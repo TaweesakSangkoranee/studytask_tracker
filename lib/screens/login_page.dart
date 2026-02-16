@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'register_page.dart';
+import 'forgot_password_page.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,7 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
@@ -23,12 +26,16 @@ class _LoginPageState extends State<LoginPage> {
 
       final account = await _googleSignIn.signIn();
 
+      if (!mounted) return;
+
       if (account != null) {
-        debugPrint(account.email);
+        debugPrint("Google → ${account.email}");
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Welcome ${account.displayName}")),
         );
+
+        // 👉 TODO: ไปหน้า Home
       }
     } catch (e) {
       debugPrint("Google Error: $e");
@@ -41,23 +48,43 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // ---------------- EMAIL LOGIN ----------------
-  void signInWithEmail() {
-    final email = emailController.text.trim();
+  // ---------------- USERNAME LOGIN ----------------
+  void signInWithUsername() {
+    final username = usernameController.text.trim();
     final password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("กรอก email และ password")),
+        const SnackBar(content: Text("กรอก Username และ Password")),
       );
       return;
     }
 
-    debugPrint("Email → $email");
+    debugPrint("Username → $username");
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Logged in as $email")),
+      SnackBar(content: Text("Logged in as $username")),
     );
+
+    // 👉 TODO: ตรวจสอบ backend / ไป Home
+  }
+
+  // ---------------- FORGOT PASSWORD ----------------
+  void forgotPassword() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("ไปหน้า Reset Password")),
+    );
+
+    // Navigator.push(...)
+  }
+
+  // ---------------- SIGN UP ----------------
+  void signUp() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("ไปหน้า Sign Up")),
+    );
+
+    // Navigator.push(...)
   }
 
   // ---------------- UI ----------------
@@ -95,15 +122,19 @@ class _LoginPageState extends State<LoginPage> {
 
                   RichText(
                     text: const TextSpan(
-                      style:
-                          TextStyle(fontSize: 42, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                      ),
                       children: [
                         TextSpan(
-                            text: 'Study',
-                            style: TextStyle(color: Color(0xFF1A1C2E))),
+                          text: 'Study',
+                          style: TextStyle(color: Color(0xFF1A1C2E)),
+                        ),
                         TextSpan(
-                            text: 'Task',
-                            style: TextStyle(color: Colors.blueAccent)),
+                          text: 'Task',
+                          style: TextStyle(color: Colors.blueAccent),
+                        ),
                       ],
                     ),
                   ),
@@ -142,7 +173,9 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             "เชื่อมโยงงานจาก Google Classroom ให้คุณโดยอัตโนมัติ พร้อมวิเคราะห์ความสำคัญด้วย AI",
                             style: TextStyle(
-                                fontSize: 12, color: Colors.blueGrey[800]),
+                              fontSize: 12,
+                              color: Colors.blueGrey[800],
+                            ),
                           ),
                         ),
                       ],
@@ -154,58 +187,88 @@ class _LoginPageState extends State<LoginPage> {
                   const Text(
                     "OR EXPLORE MORE",
                     style: TextStyle(
-                        color: Colors.grey,
-                        letterSpacing: 1.2,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.grey,
+                      letterSpacing: 1.2,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 20),
 
                   // --- INPUTS ---
-                  _buildTextField("Email Address",
-                      controller: emailController),
+                  _buildTextField(
+                    "Username",
+                    controller: usernameController,
+                  ),
                   const SizedBox(height: 15),
-                  _buildTextField("Password",
-                      isPassword: true, controller: passwordController),
-
-                  const SizedBox(height: 10),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                          onPressed: () {},
-                          child: const Text("Forgot Access?",
-                              style: TextStyle(color: Colors.grey))),
-                      TextButton(
-                          onPressed: () {},
-                          child: const Text("New Member",
-                              style: TextStyle(
-                                  color: Colors.blueAccent,
-                                  fontWeight: FontWeight.bold))),
-                    ],
+                  _buildTextField(
+                    "Password",
+                    isPassword: true,
+                    controller: passwordController,
                   ),
 
                   const SizedBox(height: 10),
 
-                  // --- EMAIL BUTTON ---
+                  Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+
+                            // -------- FORGOT --------
+                            TextButton(
+                            onPressed: () {
+                                Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
+                                );
+                            },
+                            child: const Text(
+                                "Forgot Access?",
+                                style: TextStyle(color: Colors.grey),
+                            ),
+                            ),
+
+                            // -------- REGISTER --------
+                            TextButton(
+                            onPressed: () {
+                                Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const RegisterPage()),
+                                );
+                            },
+                            child: const Text(
+                                "New Member",
+                                style: TextStyle(
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+
+                  const SizedBox(height: 10),
+
+                  // --- SIGN IN BUTTON ---
                   SizedBox(
                     width: double.infinity,
                     height: 60,
                     child: ElevatedButton(
-                      onPressed: signInWithEmail,
+                      onPressed: signInWithUsername,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0F172A),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text(
-                        "Sign In with Email",
+                        "Sign In",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -230,6 +293,14 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // ---------------- DISPOSE ----------------
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   // ---------------- WIDGETS ----------------
 
   Widget _buildGoogleButton() {
@@ -246,13 +317,18 @@ class _LoginPageState extends State<LoginPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Continue with Google",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text("SYNC WITH CLASSROOM",
-                  style: TextStyle(
-                      color: Colors.blueAccent,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold)),
+              Text(
+                "Continue with Google",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Text(
+                "SYNC WITH CLASSROOM",
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           Spacer(),
@@ -262,20 +338,26 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildTextField(String hint,
-      {bool isPassword = false, TextEditingController? controller}) {
+  Widget _buildTextField(
+    String hint, {
+    bool isPassword = false,
+    TextEditingController? controller,
+  }) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle:
-            const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+          fontWeight: FontWeight.bold,
+        ),
         filled: true,
         fillColor: const Color(0xFFF8FAFC),
         border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       ),
@@ -297,11 +379,14 @@ class _LoginPageState extends State<LoginPage> {
               Icon(Icons.verified_user_outlined,
                   size: 16, color: Colors.teal),
               SizedBox(width: 5),
-              Text("END-TO-END ENCRYPTED LOGIN",
-                  style: TextStyle(
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 11)),
+              Text(
+                "END-TO-END ENCRYPTED LOGIN",
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
+              ),
             ],
           ),
           SizedBox(height: 5),
@@ -309,9 +394,10 @@ class _LoginPageState extends State<LoginPage> {
             "INTEGRATED WITH GOOGLE CLOUD IDENTITY & CLASSROOM PLATFORM",
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Colors.grey,
-                fontSize: 9,
-                fontWeight: FontWeight.bold),
+              color: Colors.grey,
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+            ),
           )
         ],
       ),
